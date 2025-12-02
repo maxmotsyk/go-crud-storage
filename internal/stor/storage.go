@@ -34,7 +34,7 @@ func (s *Storage) GetUser(id int64) (*sql.Rows, error) {
 }
 
 func (s *Storage) UpdateUser(u *domain.User, id int64) error {
-	_, err := s.DB.Exec("UPDATE users SET name = $1, lastName = $2, age = $3 , email = $4 WHERE id = $5",
+	_, err := s.DB.Exec("UPDATE users SET  name = $1, lastName = $2, age = $3 , email = $4 WHERE id = $5",
 		u.Name, u.LastName, u.Age, u.Email, id)
 
 	if err != nil {

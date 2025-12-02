@@ -1,0 +1,42 @@
+# --- GO BUILD FILES ---
+bin/
+build/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace files
+go.work
+go.work.sum
+
+# --- ENV FILES ---
+.env
+.env.*
+!env.example        # если хочешь оставить шаблон без секретов
+
+# --- DOCKER ---
+*.pid
+*.log
+docker-compose.override.yml
+docker-compose.local.yml
+
+# --- SYSTEM FILES ---
+.DS_Store
+Thumbs.db
+
+# --- IDE / EDITOR ---
+.vscode/
+.idea/
+*.swp
+
+# --- LOGS ---
+logs/
+*.log
+
+# --- MODULE VENDORS ---
+vendor/
