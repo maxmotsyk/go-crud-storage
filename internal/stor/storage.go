@@ -16,7 +16,7 @@ func NewStorage(d *sql.DB) *Storage {
 }
 
 func (s *Storage) CreateUser(u *domain.User) error {
-	_, err := s.DB.Exec("insert into users (name, lastName, age, email ) values ($1, $2, $3, $4)",
+	_, err := s.DB.Exec("Insert into users (name, lastName, age, email ) values ($1, $2, $3, $4)",
 		u.Name, u.LastName, u.Age, u.Email)
 	if err != nil {
 		return err
