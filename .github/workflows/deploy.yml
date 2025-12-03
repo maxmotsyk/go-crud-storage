@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /opt/go-crud-storage  # путь к проекту на EC2, поправь если другой
+            cd /opt/go-crud-storage/go-crud-storage  # путь к проекту на EC2, поправь если другой
             git pull origin main || true
             docker compose pull api
             docker compose up -d
