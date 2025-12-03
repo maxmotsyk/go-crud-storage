@@ -47,7 +47,16 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /opt/go-crud-storage/go-crud-storage  # путь к проекту на EC2, поправь если другой
+            set -e
+
+            echo ">>> Go to project directory"
+            cd /opt/go-crud-storage/go-crud-storage  # путь, как у тебя в терминале
+
+            echo ">>> Pull latest code from GitHub"
             git pull origin main || true
-            docker compose pull api
-            docker compose up -d
+
+            echo ">>> Build and restart containers"
+            docker-compose up -d --build
+
+            echo ">>> Show status"
+            docker-compose ps
