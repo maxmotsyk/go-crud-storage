@@ -1,0 +1,11 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: Simple CRUD API on Go + chi + Postgres
+  title: Go CRUD Storage API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

@@ -11,6 +11,16 @@ import (
 	"gocrud/internal/stor"
 )
 
+// @title           Go CRUD Storage API
+// @version         1.0
+// @description     Simple CRUD API on Go + chi + Postgres
+
+// @contact.name   API Support
+// @contact.email  support@example.com
+
+// @host      localhost:8080
+// @BasePath  /
+
 func main() {
 	// Берём DSN только из окружения
 	dsn := os.Getenv("DB_DSN")
