@@ -3,6 +3,7 @@ package stor
 import (
 	"database/sql"
 	"gocrud/internal/domain"
+	"log"
 )
 
 type Storage struct {
@@ -16,9 +17,13 @@ func NewStorage(d *sql.DB) *Storage {
 }
 
 func (s *Storage) CreateUser(u *domain.User) error {
-	_, err := s.DB.Exec("Insert into users (name, lastName, age, email ) values ($1, $2, $3, $4)",
-		u.Name, u.LastName, u.Age, u.Email)
+	_, err := s.DB.Exec(`
+        INSERT INTO users (id,name, lastName, age, email)
+        VALUES ($1, $2, $3, $4, $5)
+    `, u.Id, u.Name, u.LastName, u.Age, u.Email)
+
 	if err != nil {
+		log.Printf("CreateUser DB error: %v", err) // <<< добавь лог
 		return err
 	}
 
@@ -45,7 +50,7 @@ func (s *Storage) UpdateUser(u *domain.User, id int64) error {
 }
 
 func (s *Storage) DeleteUser(id int64) error {
-	_, err := s.DB.Exec("delete from users where id = $1", id)
+	_, err := s.DB.Exec("DELETE FROM  users WHERE id = $1", id)
 
 	if err != nil {
 		return err
