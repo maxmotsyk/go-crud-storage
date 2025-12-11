@@ -18,7 +18,7 @@ import (
 // @contact.name   API Support
 // @contact.email  support@example.com
 
-// @host      localhost:8080
+// @host
 // @BasePath  /
 
 func main() {
