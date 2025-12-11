@@ -23,6 +23,17 @@ func NewUserHandler(newStor *stor.Storage) *UserHandler {
 	}
 }
 
+// CreateUser godoc
+// @Summary      Create a new user
+// @Description  Creates a user in the database based on the provided JSON body
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        user  body      domain.User  true  "User data"
+// @Success      201   {object}  domain.User
+// @Failure      400   {string}  string  "Invalid body"
+// @Failure      500   {string}  string  "Failed to create user"
+// @Router       /users [post]
 // CreateUser обрабатывает запрос POST /users
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Создаём пустую структуру, в которую будем декодировать JSON
@@ -47,6 +58,18 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(user)
 }
 
+// GetUser godoc
+// @Summary      Get user by ID
+// @Description  Returns a user from the database by its ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  domain.User
+// @Failure      400  {string}  string  "Invalid id"
+// @Failure      404  {string}  string  "User not found"
+// @Failure      500  {string}  string  "Failed to get user"
+// @Router       /users/{id} [get]
 // GetUser обрабатывает запрос GET /users/{id}
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	// Достаём id из URL: /users/{id}
@@ -88,6 +111,18 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(user)
 }
 
+// UpdateUser godoc
+// @Summary      Update user
+// @Description  Updates user data by ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int          true  "User ID"
+// @Param        user  body      domain.User  true  "Updated user data"
+// @Success      200   {object}  domain.User
+// @Failure      400   {string}  string  "Invalid id or invalid body"
+// @Failure      500   {string}  string  "Failed to update user"
+// @Router       /users/{id} [put]
 // UpdateUser обрабатывает запрос PUT /users/{id}
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Берём id из URL: /users/{id}
@@ -116,4 +151,30 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Возвращаем обновлённого пользователя
 	_ = json.NewEncoder(w).Encode(user)
+}
+
+// DeleteUser godoc
+// @Summary      Delete user
+// @Description  Deletes a user by ID
+// @Tags         users
+// @Param        id   path      int   true  "User ID"
+// @Success      204  "User deleted"
+// @Failure      400  {string}  string  "Invalid id"
+// @Failure      500  {string}  string  "Failed to delete user"
+// @Router       /users/{id} [delete]
+func (h *UserHandler) DeleatUser(w http.ResponseWriter, r *http.Request) {
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.s.DeleteUser(id); err != nil {
+		http.Error(w, "failed to deleate user", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
