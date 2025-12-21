@@ -2,13 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 
 	_ "github.com/lib/pq"
 
 	serverPkg "gocrud/internal/http"
 	"gocrud/internal/stor"
+	"gocrud/internal/utils/logger"
 )
 
 // @title           Go CRUD Storage API
@@ -20,9 +21,14 @@ import (
 
 // @BasePath  /
 
+func init() {
+	logger.SetLogger(os.Getenv("LOGGER_ENV"))
+}
+
 func main() {
 	// Берём DSN только из окружения
 	dsn := os.Getenv("DB_DSN")
+	log.Info()
 	if dsn == "" {
 		log.Fatal("DB_DSN is not set")
 	}
@@ -42,7 +48,7 @@ func main() {
 	storage := stor.NewStorage(db)
 	httpServer := serverPkg.CreatServer(storage)
 
-	log.Println("Server listening on :8080")
+	log.Info("Server is starting")
 
 	if err := httpServer.Listen(); err != nil {
 		log.Fatalf("server stopped with error: %v", err)
