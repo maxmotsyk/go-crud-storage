@@ -1,12 +1,12 @@
 package http
 
 import (
-	_ "gocrud/internal/docs" // важливо!
-	h "gocrud/internal/hendlers"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
+	_ "gocrud/internal/docs" // важливо!
+	h "gocrud/internal/hendlers"
+	"gocrud/internal/http/middlewares/logging"
 )
 
 func SetupRoutes(r *chi.Mux, handler *h.UserHandler) {
@@ -21,6 +21,8 @@ func SetupRoutes(r *chi.Mux, handler *h.UserHandler) {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+
+	r.Use(logging.LoggingMidlware)
 
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/", handler.CreateUser)       // POST /users
