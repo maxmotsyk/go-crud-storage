@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 
 	"gocrud/internal/domain"
 	"gocrud/internal/stor"
@@ -49,6 +50,10 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Вызываем метод уровня хранения (Storage), который пишет в БД
 	if err := h.s.CreateUser(&user); err != nil {
 		// Если БД вернула ошибку — это уже 500
+		log.WithFields(log.Fields{
+			"hendler": "CreatUser",
+			"problme": "problem with add User to DB",
+		}).Error(err)
 		http.Error(w, "failed to create user", http.StatusInternalServerError)
 		return
 	}
@@ -77,7 +82,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		// Если id не число — 400
-		http.Error(w, "invalid id", http.StatusBadRequest)
+		http.Error(w, "invalid id - id must be a number", http.StatusBadRequest)
 		return
 	}
 
@@ -85,6 +90,10 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.s.GetUser(id)
 	if err != nil {
 		// Ошибка уровня БД — 500
+		log.WithFields(log.Fields{
+			"hendler": "GetUser",
+			"problem": "failed to get user",
+		}).Error(err)
 		http.Error(w, "failed to get user", http.StatusInternalServerError)
 		return
 	}
@@ -142,6 +151,10 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Вызываем метод обновления в Storage, передаём id отдельно
 	if err := h.s.UpdateUser(&user, id); err != nil {
+		log.WithFields(log.Fields{
+			"hendler": "UpdateUser",
+			"problem": "failed to update user",
+		}).Error(err)
 		http.Error(w, "failed to update user", http.StatusInternalServerError)
 		return
 	}
@@ -172,6 +185,10 @@ func (h *UserHandler) DeleatUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.s.DeleteUser(id); err != nil {
+		log.WithFields(log.Fields{
+			"hendler": "DeleatUser",
+			"problem": "failed to deleate user in DB",
+		}).Error(err)
 		http.Error(w, "failed to deleate user", http.StatusInternalServerError)
 		return
 	}

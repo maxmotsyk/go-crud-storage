@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	_ "github.com/lib/pq"
 
@@ -28,7 +30,6 @@ func init() {
 func main() {
 	// Берём DSN только из окружения
 	dsn := os.Getenv("DB_DSN")
-	log.Info()
 	if dsn == "" {
 		log.Fatal("DB_DSN is not set")
 	}
@@ -37,6 +38,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot open db: %v", err)
 	}
+
+	log.Info("Successfully open connect with DB")
+
 	defer db.Close()
 
 	if err := db.Ping(); err != nil {
@@ -48,7 +52,7 @@ func main() {
 	storage := stor.NewStorage(db)
 	httpServer := serverPkg.CreatServer(storage)
 
-	log.Info("Server is starting")
+	log.Info(fmt.Sprintf("Server is startingдl isten on port %d", 8080))
 
 	if err := httpServer.Listen(); err != nil {
 		log.Fatalf("server stopped with error: %v", err)

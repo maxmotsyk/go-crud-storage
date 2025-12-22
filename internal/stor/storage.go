@@ -2,8 +2,10 @@ package stor
 
 import (
 	"database/sql"
+	"fmt"
 	"gocrud/internal/domain"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Storage struct {
@@ -27,6 +29,12 @@ func (s *Storage) CreateUser(u *domain.User) error {
 		return err
 	}
 
+	log.WithFields(log.Fields{
+		"layer":   "storage",
+		"action":  "createUser",
+		"user_id": u.Id,
+	}).Info("User created successfully")
+
 	return nil
 }
 
@@ -35,6 +43,12 @@ func (s *Storage) GetUser(id int64) (*sql.Rows, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.WithFields(log.Fields{
+		"layer":  "storage",
+		"action": "getUser",
+	}).Info(fmt.Sprintf("Successfully retrieved user with id %d", id))
+
 	return row, nil
 }
 
@@ -46,6 +60,11 @@ func (s *Storage) UpdateUser(u *domain.User, id int64) error {
 		return err
 	}
 
+	log.WithFields(log.Fields{
+		"layer":  "storage",
+		"action": "updateUser",
+	}).Info(fmt.Sprintf("Successfully update user with id %d", id))
+
 	return nil
 }
 
@@ -55,6 +74,11 @@ func (s *Storage) DeleteUser(id int64) error {
 	if err != nil {
 		return err
 	}
+
+	log.WithFields(log.Fields{
+		"layer":  "storage",
+		"action": "deleteUser",
+	}).Info(fmt.Sprintf("Successfully delete user with id %d", id))
 
 	return nil
 }
