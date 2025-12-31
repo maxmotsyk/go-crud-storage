@@ -111,7 +111,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	// Сканируем значения из строки в структуру user
 	// Порядок полей должен совпадать с SELECT * FROM users:
 	// id, name, lastName, age, email
-	if err := rows.Scan(&user.Id, &user.Name, &user.LastName, &user.Age, &user.Email); err != nil {
+	if err := rows.Scan(&user.Name, &user.LastName, &user.Age, &user.Email); err != nil {
 		http.Error(w, "scan error", http.StatusInternalServerError)
 		return
 	}

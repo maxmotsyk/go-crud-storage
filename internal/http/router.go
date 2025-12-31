@@ -22,7 +22,7 @@ func SetupRoutes(r *chi.Mux, handler *h.UserHandler) {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	r.Use(logging.LoggingMidlware)
+	r.Use(logging.LoggingMiddleware)
 
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/", handler.CreateUser)       // POST /users
