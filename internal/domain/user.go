@@ -13,6 +13,7 @@ func init() {
 }
 
 type User struct {
+	Id             int
 	Name           string
 	LastName       string
 	Age            int
@@ -40,4 +41,12 @@ type SignInInput struct {
 
 func (si *SignInInput) Validate() error {
 	return validate.Struct(si)
+}
+
+type UpdateUser struct {
+	//ToDo
+	// Name     string `validate:"required,min=2"`
+	// LastName string `validate:"required,min=3"`
+	// Age      int    `validate:"required,gte=0,lte=130"`
+	// Email    string `validate:"required,email"`
 }

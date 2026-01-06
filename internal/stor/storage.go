@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gocrud/internal/domain"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -18,11 +19,12 @@ func NewStorage(d *sql.DB) *Storage {
 	}
 }
 
-func (s *Storage) CreateUser(u *domain.User) error {
+func (s *Storage) CreateUser(u *domain.SignUpInput) error {
+	registered_time := time.Now()
 	_, err := s.DB.Exec(`
-        INSERT INTO users (id,name, lastName, age, email)
-        VALUES ($1, $2, $3, $4, $5)
-    `, u.Id, u.Name, u.LastName, u.Age, u.Email)
+        INSERT INTO users (name, lastName, age, email, password, registered_time)
+        VALUES ($1, $2, $3, $4, $5, $6)
+    `, u.Name, u.LastName, u.Age, u.Email, u.Password, registered_time)
 
 	if err != nil {
 		log.Printf("CreateUser DB error: %v", err) // <<< добавь лог
@@ -32,13 +34,14 @@ func (s *Storage) CreateUser(u *domain.User) error {
 	log.WithFields(log.Fields{
 		"layer":   "storage",
 		"action":  "createUser",
-		"user_id": u.Id,
+		"user_id": u.Email,
 	}).Info("User created successfully")
 
 	return nil
 }
 
 func (s *Storage) GetUser(id int64) (*sql.Rows, error) {
+
 	row, err := s.DB.Query("SELECT * FROM users WHERE id = $1", id)
 	if err != nil {
 		return nil, err
@@ -53,6 +56,7 @@ func (s *Storage) GetUser(id int64) (*sql.Rows, error) {
 }
 
 func (s *Storage) UpdateUser(u *domain.User, id int64) error {
+	//ToDo UpdateUser in struct.go before fix this handler
 	_, err := s.DB.Exec("UPDATE users SET  name = $1, lastName = $2, age = $3 , email = $4 WHERE id = $5",
 		u.Name, u.LastName, u.Age, u.Email, id)
 
