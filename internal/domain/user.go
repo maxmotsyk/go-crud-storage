@@ -50,3 +50,15 @@ type UpdateUser struct {
 	// Age      int    `validate:"required,gte=0,lte=130"`
 	// Email    string `validate:"required,email"`
 }
+
+type UpdateUserInput struct {
+	Name     string `validate:"omitempty,min=2"`
+	LastName string `validate:"omitempty,min=3"`
+	Age      int    `validate:"omitempty,gte=0,lte=130"`
+	Email    string `validate:"omitempty,email"`
+	Password string `validate:"omitempty,min=8,regexp=^(?=.*[A-Za-z])(?=.*\\d).+$"`
+}
+
+func (uu *UpdateUserInput) Validate() error {
+	return validate.Struct(uu)
+}

@@ -55,19 +55,70 @@ func (s *Storage) GetUser(id int64) (*sql.Rows, error) {
 	return row, nil
 }
 
-func (s *Storage) UpdateUser(u *domain.User, id int64) error {
-	//ToDo UpdateUser in struct.go before fix this handler
-	_, err := s.DB.Exec("UPDATE users SET  name = $1, lastName = $2, age = $3 , email = $4 WHERE id = $5",
-		u.Name, u.LastName, u.Age, u.Email, id)
+func (s *Storage) UpdateUser(u *domain.UpdateUserInput, id int64) error {
+	query := "UPDATE users SET "
+	args := []interface{}{}
+	argIndex := 1
 
+	// Динамічно додаємо поля, які були передані (не пусті)
+	if u.Name != "" {
+		query += fmt.Sprintf("name = $%d, ", argIndex)
+		args = append(args, u.Name)
+		argIndex++
+	}
+
+	if u.LastName != "" {
+		query += fmt.Sprintf("last_name = $%d, ", argIndex)
+		args = append(args, u.LastName)
+		argIndex++
+	}
+
+	if u.Age != 0 {
+		query += fmt.Sprintf("age = $%d, ", argIndex)
+		args = append(args, u.Age)
+		argIndex++
+	}
+
+	if u.Email != "" {
+		query += fmt.Sprintf("email = $%d, ", argIndex)
+		args = append(args, u.Email)
+		argIndex++
+	}
+
+	if u.Password != "" {
+		query += fmt.Sprintf("password = $%d, ", argIndex)
+		args = append(args, u.Password)
+		argIndex++
+	}
+
+	// Видаляємо останню кому
+	query = query[:len(query)-2]
+	query += fmt.Sprintf(" WHERE id = $%d", argIndex)
+	args = append(args, id)
+
+	// Якщо немає полів для обновлення
+	if len(args) == 1 {
+		log.WithFields(log.Fields{
+			"layer":  "storage",
+			"action": "updateUser",
+		}).Warn(fmt.Sprintf("No fields to update for user id %d", id))
+		return nil
+	}
+
+	_, err := s.DB.Exec(query, args...)
 	if err != nil {
-		return err
+		log.WithFields(log.Fields{
+			"layer":  "storage",
+			"action": "updateUser",
+		}).Error(err)
+		//Check what i need return after logging errors
+		return nil
 	}
 
 	log.WithFields(log.Fields{
 		"layer":  "storage",
 		"action": "updateUser",
-	}).Info(fmt.Sprintf("Successfully update user with id %d", id))
+	}).Info(fmt.Sprintf("Successfully updated user with id %d", id))
 
 	return nil
 }
