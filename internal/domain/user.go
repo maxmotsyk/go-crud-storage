@@ -27,7 +27,7 @@ type SignUpInput struct {
 	LastName string `validate:"required,min=3"`
 	Age      int    `validate:"required,gte=0,lte=130"`
 	Email    string `validate:"required,email"`
-	Password string `validate:"required,min=8,regexp=^(?=.*[A-Za-z])(?=.*\\d).+$"`
+	Password string `validate:"required,min=8"`
 }
 
 func (su *SignUpInput) Validate() error {
@@ -36,19 +36,11 @@ func (su *SignUpInput) Validate() error {
 
 type SignInInput struct {
 	Email    string `validate:"required,email"`
-	Password string `validate:"required,min=8,regexp=^(?=.*[A-Za-z])(?=.*\\d).+$"`
+	Password string `validate:"required,min=8"`
 }
 
 func (si *SignInInput) Validate() error {
 	return validate.Struct(si)
-}
-
-type UpdateUser struct {
-	//ToDo
-	// Name     string `validate:"required,min=2"`
-	// LastName string `validate:"required,min=3"`
-	// Age      int    `validate:"required,gte=0,lte=130"`
-	// Email    string `validate:"required,email"`
 }
 
 type UpdateUserInput struct {
@@ -56,7 +48,7 @@ type UpdateUserInput struct {
 	LastName string `validate:"omitempty,min=3"`
 	Age      int    `validate:"omitempty,gte=0,lte=130"`
 	Email    string `validate:"omitempty,email"`
-	Password string `validate:"omitempty,min=8,regexp=^(?=.*[A-Za-z])(?=.*\\d).+$"`
+	Password string `validate:"omitempty,min=8"`
 }
 
 func (uu *UpdateUserInput) Validate() error {

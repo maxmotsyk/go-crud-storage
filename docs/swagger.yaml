@@ -1,5 +1,29 @@
 basePath: /
 definitions:
+  domain.SignUpInput:
+    properties:
+      age:
+        maximum: 130
+        minimum: 0
+        type: integer
+      email:
+        type: string
+      lastName:
+        minLength: 3
+        type: string
+      name:
+        minLength: 2
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - age
+    - email
+    - lastName
+    - name
+    - password
+    type: object
   domain.User:
     properties:
       age:
@@ -7,11 +31,14 @@ definitions:
       email:
         type: string
       id:
-        format: int64
         type: integer
       lastName:
         type: string
       name:
+        type: string
+      password:
+        type: string
+      registeredTime:
         type: string
     type: object
 info:
@@ -33,14 +60,14 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/domain.User'
+          $ref: '#/definitions/domain.SignUpInput'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/domain.SignUpInput'
         "400":
           description: Invalid body
           schema:
@@ -49,7 +76,7 @@ paths:
           description: Failed to create user
           schema:
             type: string
-      summary: Create a new user
+      summary: Sign up a new user
       tags:
       - users
   /users/{id}:

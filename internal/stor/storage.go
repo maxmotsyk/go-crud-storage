@@ -2,6 +2,7 @@ package stor
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"gocrud/internal/domain"
 	"time"
@@ -22,12 +23,12 @@ func NewStorage(d *sql.DB) *Storage {
 func (s *Storage) CreateUser(u *domain.SignUpInput) error {
 	registered_time := time.Now()
 	_, err := s.DB.Exec(`
-        INSERT INTO users (name, lastName, age, email, password, registered_time)
+        INSERT INTO users (name, last_name, age, email, password, registered_time)
         VALUES ($1, $2, $3, $4, $5, $6)
     `, u.Name, u.LastName, u.Age, u.Email, u.Password, registered_time)
 
 	if err != nil {
-		log.Printf("CreateUser DB error: %v", err) // <<< добавь лог
+		log.Printf("CreateUser DB error: %v", err)
 		return err
 	}
 
@@ -35,14 +36,14 @@ func (s *Storage) CreateUser(u *domain.SignUpInput) error {
 		"layer":   "storage",
 		"action":  "createUser",
 		"user_id": u.Email,
-	}).Info("User created successfully")
+	}).Info("Successfully created user")
 
 	return nil
 }
 
 func (s *Storage) GetUser(id int64) (*sql.Rows, error) {
 
-	row, err := s.DB.Query("SELECT * FROM users WHERE id = $1", id)
+	row, err := s.DB.Query("SELECT id, name, last_name, age, email, registered_time FROM users WHERE id = $1", id)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +106,13 @@ func (s *Storage) UpdateUser(u *domain.UpdateUserInput, id int64) error {
 		return nil
 	}
 
-	_, err := s.DB.Exec(query, args...)
+	res, err := s.DB.Exec(query, args...)
+
+	// перевіряцмо чи примінились нащі оновлення
+	if err := ensureRowsAffected(res, id); err != nil {
+		return err
+	}
+
 	if err != nil {
 		log.WithFields(log.Fields{
 			"layer":  "storage",
@@ -124,9 +131,14 @@ func (s *Storage) UpdateUser(u *domain.UpdateUserInput, id int64) error {
 }
 
 func (s *Storage) DeleteUser(id int64) error {
-	_, err := s.DB.Exec("DELETE FROM  users WHERE id = $1", id)
+	res, err := s.DB.Exec("DELETE FROM  users WHERE id = $1", id)
 
 	if err != nil {
+		return err
+	}
+
+	// перевіряцмо чи примінились нащі оновлення
+	if err := ensureRowsAffected(res, id); err != nil {
 		return err
 	}
 
@@ -134,6 +146,21 @@ func (s *Storage) DeleteUser(id int64) error {
 		"layer":  "storage",
 		"action": "deleteUser",
 	}).Info(fmt.Sprintf("Successfully delete user with id %d", id))
+
+	return nil
+}
+
+func ensureRowsAffected(res sql.Result, id int64) error {
+
+	rows, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return errors.New(fmt.Sprintf("User not found with id = %d", id))
+	}
 
 	return nil
 }

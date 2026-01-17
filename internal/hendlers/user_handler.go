@@ -24,21 +24,21 @@ func NewUserHandler(newStor *stor.Storage) *UserHandler {
 	}
 }
 
-// CreateUser godoc
-// @Summary      Create a new user
+// SignUp godoc
+// @Summary      Sign up a new user
 // @Description  Creates a user in the database based on the provided JSON body
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        user  body      domain.User  true  "User data"
-// @Success      201   {object}  domain.User
+// @Param        user  body      domain.SignUpInput  true  "User data"
+// @Success      201   {object}  domain.SignUpInput
 // @Failure      400   {string}  string  "Invalid body"
 // @Failure      500   {string}  string  "Failed to create user"
 // @Router       /users [post]
-// CreateUser обрабатывает запрос POST /users
-func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+// SignUp обрабатывает запрос POST /users
+func (h *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Создаём пустую структуру, в которую будем декодировать JSON
-	var user domain.User
+	var user domain.SignUpInput
 
 	// Декодируем JSON из тела запроса сразу в структуру
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -47,11 +47,22 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := user.Validate(); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// ToDo Hash Password SHA256
+
 	// Вызываем метод уровня хранения (Storage), который пишет в БД
 	if err := h.s.CreateUser(&user); err != nil {
 		// Если БД вернула ошибку — это уже 500
 		log.WithFields(log.Fields{
-			"hendler": "CreatUser",
+			"hendler": "SignUp",
 			"problme": "problem with add User to DB",
 		}).Error(err)
 		http.Error(w, "failed to create user", http.StatusInternalServerError)
@@ -111,7 +122,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	// Сканируем значения из строки в структуру user
 	// Порядок полей должен совпадать с SELECT * FROM users:
 	// id, name, lastName, age, email
-	if err := rows.Scan(&user.Name, &user.LastName, &user.Age, &user.Email); err != nil {
+	if err := rows.Scan(&user.Id, &user.Name, &user.LastName, &user.Age, &user.Email, &user.RegisteredTime); err != nil {
 		http.Error(w, "scan error", http.StatusInternalServerError)
 		return
 	}
@@ -143,14 +154,23 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Декодируем новые данные пользователя из body
-	var user domain.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var updUser domain.UpdateUserInput
+	if err := json.NewDecoder(r.Body).Decode(&updUser); err != nil {
 		http.Error(w, "invalid body", http.StatusBadRequest)
 		return
 	}
 
+	if err := updUser.Validate(); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	// Вызываем метод обновления в Storage, передаём id отдельно
-	if err := h.s.UpdateUser(&user, id); err != nil {
+	if err := h.s.UpdateUser(&updUser, id); err != nil {
 		log.WithFields(log.Fields{
 			"hendler": "UpdateUser",
 			"problem": "failed to update user",
@@ -159,11 +179,8 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проставляем id в структуру, чтобы вернуть актуальные данные
-	user.Id = id
-
 	// Возвращаем обновлённого пользователя
-	_ = json.NewEncoder(w).Encode(user)
+	_ = json.NewEncoder(w).Encode(updUser)
 }
 
 // DeleteUser godoc
@@ -189,7 +206,7 @@ func (h *UserHandler) DeleatUser(w http.ResponseWriter, r *http.Request) {
 			"hendler": "DeleatUser",
 			"problem": "failed to deleate user in DB",
 		}).Error(err)
-		http.Error(w, "failed to deleate user", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

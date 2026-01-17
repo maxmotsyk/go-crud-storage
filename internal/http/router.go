@@ -4,7 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
-	_ "gocrud/internal/docs" // важливо!
+	_ "gocrud/docs" // важливо!
 	h "gocrud/internal/hendlers"
 	"gocrud/internal/http/middlewares/logging"
 )
@@ -13,8 +13,7 @@ func SetupRoutes(r *chi.Mux, handler *h.UserHandler) {
 
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"*"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -25,7 +24,7 @@ func SetupRoutes(r *chi.Mux, handler *h.UserHandler) {
 	r.Use(logging.LoggingMiddleware)
 
 	r.Route("/users", func(r chi.Router) {
-		r.Post("/", handler.CreateUser)       // POST /users
+		r.Post("/", handler.SignUp)           // POST /users
 		r.Get("/{id}", handler.GetUser)       // GET /users/{id}
 		r.Put("/{id}", handler.UpdateUser)    // PUT /users/{id}
 		r.Delete("/{id}", handler.DeleatUser) // когда допишешь Delete
